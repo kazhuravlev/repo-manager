@@ -1,0 +1,20 @@
+version: '1'
+
+policies:
+  - id: policy-example
+    name: Name of policy
+    rules:
+      - rule: go-dep-module-min-version
+        params:
+          module: go.uber.org/zap
+          minVersion: latest
+      - rule: go-dep-has-no-module
+        params:
+          module: github.com/pkg/errors
+
+repos:
+  - name: My repo
+    path: ./path/to/repo
+    type: golang
+    policies:
+      - policy-example
