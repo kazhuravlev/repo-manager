@@ -13,6 +13,8 @@ const (
 	keySpecFilename = "spec"
 )
 
+var version = "__unknown__"
+
 func main() {
 	app := &cli.App{
 		Name: "repo-manager",
