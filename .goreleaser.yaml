@@ -16,21 +16,21 @@ builds:
       - linux
       - windows
       - darwin
-dockers:
-  - id: repo-manager
-    goos: linux
-    goarch: amd64
-    ids:
-      - repo-manager
-    image_templates:
-      - "kazhuravlev/repo-manager:latest"
-      - "kazhuravlev/repo-manager:{{ .Tag }}"
-      - "kazhuravlev/repo-manager:v{{ .Major }}"
-      - "kazhuravlev/repo-manager:v{{ .Major }}.{{ .Minor }}"
-    dockerfile: 'Dockerfile'
-    use: buildx
-    build_flag_templates:
-      - "--platform=linux/amd64"
+# dockers:
+#   - id: repo-manager
+#     goos: linux
+#     goarch: amd64
+#     ids:
+#       - repo-manager
+#     image_templates:
+#       - "kazhuravlev/repo-manager:latest"
+#       - "kazhuravlev/repo-manager:{{ .Tag }}"
+#       - "kazhuravlev/repo-manager:v{{ .Major }}"
+#       - "kazhuravlev/repo-manager:v{{ .Major }}.{{ .Minor }}"
+#     dockerfile: 'Dockerfile'
+#     use: buildx
+#     build_flag_templates:
+#       - "--platform=linux/amd64"
 brews:
   - name: repo-manager
     goarm: "6"
