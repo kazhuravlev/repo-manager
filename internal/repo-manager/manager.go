@@ -114,6 +114,13 @@ func (m *RepoManager) initRule(spec RuleSpec) (Rule, error) {
 		}
 
 		return ruleGoDepHasNoModule(req), nil
+	case RuleNameGoVersion:
+		var req GoVersion
+		if err := mapstructure.WeakDecode(spec.Params, &req); err != nil {
+			return nil, fmt.Errorf("cannot parse rule params: %w", err)
+		}
+
+		return ruleGoVersion(req)
 	}
 }
 
@@ -223,15 +230,6 @@ func parseGolangRepo(path string) (*Repo, error) {
 
 type Rule func(Repo) []string
 
-func runRules(r Repo, rules []Rule) []string {
-	var warnings []string
-	for i := range rules {
-		warnings = append(warnings, rules[i](r)...)
-	}
-
-	return warnings
-}
-
 func ruleMustPresentRequire(module string) Rule {
 	warnReqMustPresent := fmt.Sprintf("must: requirement `%s` is present in go.mod", module)
 
@@ -326,6 +324,31 @@ func ruleGoDepHasNoModule(req GoDepHasNoModuleReq) Rule {
 	}
 }
 
+type GoVersion struct {
+	MinVersion string
+}
+
+func ruleGoVersion(req GoVersion) (Rule, error) {
+	warnGoVersionIsTooOld := fmt.Sprintf("must: golang version at least `%s`", req.MinVersion)
+	minVersion, err := semver.NewVersion(req.MinVersion)
+	if err != nil {
+		return nil, fmt.Errorf("cannot parse min version: %w", err)
+	}
+
+	return func(r Repo) []string {
+		actualVersion, err := semver.NewVersion(r.GoModFile.Go.Version)
+		if err != nil {
+			return []string{warnGoVersionIsTooOld}
+		}
+
+		if actualVersion.LessThan(minVersion) {
+			return []string{warnGoVersionIsTooOld}
+		}
+
+		return nil
+	}, nil
+}
+
 type RepoSpec struct {
 	Name     string
 	Path     string
@@ -338,6 +361,7 @@ type RuleName string
 const (
 	RuleNameGoDepModMinVersion RuleName = "go-dep-module-min-version"
 	RuleNameGoDepHasNoModule   RuleName = "go-dep-has-no-module"
+	RuleNameGoVersion          RuleName = "go-version"
 )
 
 type RuleSpec struct {
